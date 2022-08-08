@@ -88,10 +88,10 @@ export const loginUser = async(req) => {
     try{
         const { username, password } = req.body;
 
-        const user = await User.findOne({ username })
-            .populate({path: "role", model: Role, select: "name"});
+        const user = await User.findOne({ username });
 
         if (user && (await bcrypt.compare(password, user.password))) {
+
             const accesstoken = await sign({'_id': user._id, 'username': username});
             const refreshtoken = await signrefresh({'_id': user._id, 'username': username});
 

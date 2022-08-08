@@ -28,8 +28,6 @@ app.use(body_parser.urlencoded({
     extended: true
 }));
 
-app.use(morgan('dev'));
-
 //routes
 app.use('/api/v1/users/', userRouter);
 app.get('/', (_, res) => {
