@@ -84,30 +84,57 @@ export const putUser = async(req) => {
     }
 };
 
-export const loginUser = async(req) => {
-    try{
+export const loginUser = async (req) => {
+    try {
         const { username, password } = req.body;
 
         const user = await User.findOne({ username });
 
         if (user && (await bcrypt.compare(password, user.password))) {
-
-            const accesstoken = await sign({'_id': user._id, 'username': username});
-            const refreshtoken = await signrefresh({'_id': user._id, 'username': username});
+            const accesstoken = await sign({ '_id': user._id, 'username': username });
+            const refreshtoken = await signrefresh({ '_id': user._id, 'username': username });
 
             user.accesstoken = accesstoken;
             user.refreshtoken = refreshtoken;
 
             await user.save();
-
-            return user;
+            return {
+                userId: user._id,
+                firstname: user.firstname,
+                lastname: user.lastname,
+                username: user.username,
+                email: user.email,
+                status: user.status,
+                accesstoken: user.accesstoken,
+                refreshtoken: user.refreshtoken
+            };
         }
 
         return "Invalid Credentials";
 
-      } catch (error) {
+    } catch (error) {
         return error;
-      }
+    }
+}
+
+export const loginRefreshUser = async (refreshtoken) => {
+    try {
+        const user = await User.findOne({ refreshtoken });
+
+        if (user !== null) {
+            const accesstoken = await sign({ '_id': user._id, 'username': user.username });
+
+            user.accesstoken = accesstoken;
+
+            await user.save();
+            return { accesstoken: user.accesstoken };
+        }
+
+        return "Invalid Refresh Token";
+
+    } catch (error) {
+        return error;
+    }
 }
 
 export const delUser = async(id) => {
